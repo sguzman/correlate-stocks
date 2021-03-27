@@ -1,5 +1,11 @@
+extern crate chrono;
+extern crate csv;
+extern crate serde;
+
 use serde::{Serialize, Deserialize};
 use std::env;
+use csv::Reader;
+use chrono::{Date, DateTime, TimeZone, NaiveDate};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Day {
@@ -10,6 +16,12 @@ struct Day {
     low: f32,
     close: f64,
     adjclose: f32
+}
+
+#[derive(Debug)]
+struct Data {
+    date: NaiveDate,
+    close: f64
 }
 
 fn dot(a: &Vec<f64>, b: &Vec<f64>) -> f64 {
@@ -23,39 +35,43 @@ fn dot(a: &Vec<f64>, b: &Vec<f64>) -> f64 {
     return result;
 }
 
+fn get_recs(path: &String) -> Vec<Data> {
+    let csv = std::fs::read_to_string(path).expect("Bad file");
+    let mut reader = csv::Reader::from_reader(csv.as_bytes());
+
+    let mut data = Vec::new();
+    for record in reader.deserialize() {
+        let record: Day = record.unwrap();
+
+        let date = NaiveDate::parse_from_str(&*record.date, "%Y-%m-%d").unwrap();
+        let close = record.close;
+
+        let value = Data {
+            date,
+            close
+        };
+        data.push(value);
+    }
+
+    return data
+}
+
 fn main() -> Result<(), csv::Error> {
     let args: Vec<String> = env::args().collect();
     let a = args.get(1).expect("No first file");
     let b = args.get(2).expect("No second file");
 
     println!("{}, {}", a, b);
+    let a = get_recs(a);
+    let b = get_recs(b);
+    /*
 
-    let path_a = a;
-    let path_b = b;
 
-    let csv_a = std::fs::read_to_string(path_a).expect("Bad file");
-    std::fs::read_to_string(path_b).expect("Bad file");
-
-    let mut reader_a = csv::Reader::from_reader(csv_a.as_bytes());
-    let mut reader_b = csv::Reader::from_reader(csv_a.as_bytes());
-
-    let mut data_a = Vec::new();
-    for record in reader_a.deserialize() {
-        let record: Day = record?;
-        data_a.push(record.close);
-    }
-
-    let mut data_b = Vec::new();
-    for record in reader_b.deserialize() {
-        let record: Day = record?;
-        data_b.push(record.close);
-    }
-
-    let a = data_a;
-    let b = data_b;
 
     let result = dot(&a, &b) / (dot(&a, &a) * dot(&b, &b));
     println!("{}", result);
+
+     */
 
     Ok(())
 }
