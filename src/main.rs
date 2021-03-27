@@ -35,7 +35,7 @@ fn dot(a: &Vec<f64>, b: &Vec<f64>) -> f64 {
     return result;
 }
 
-fn get_recs(path: &String) -> Vec<Data> {
+fn get_recs(path: &str) -> Vec<Data> {
     let csv = std::fs::read_to_string(path).expect("Bad file");
     let mut reader = csv::Reader::from_reader(csv.as_bytes());
 
@@ -56,18 +56,26 @@ fn get_recs(path: &String) -> Vec<Data> {
     return data
 }
 
+fn arg(args: &Vec<String>, index: u32) -> &str {
+    let file: &str =  args.get(index).expect("No file found");
+
+    return file
+}
+
+fn build(index: u32) -> Vec<Data> {
+    let args: &Vec<String> = env::args().collect();
+    let a: &str = arg(args, 1);
+    let data: Vec<Data> = get_recs(a);
+
+    return data;
+}
+
 fn main() -> Result<(), csv::Error> {
-    let args: Vec<String> = env::args().collect();
-    let a = args.get(1).expect("No first file");
-    let b = args.get(2).expect("No second file");
+    let args: &Vec<String> = env::args().collect();
+    let a: Vec<Data> = build(1);
+    let b: Vec<Data> = build(2);
 
-    println!("{}, {}", a, b);
-    let a = get_recs(a);
-    let b = get_recs(b);
     /*
-
-
-
     let result = dot(&a, &b) / (dot(&a, &a) * dot(&b, &b));
     println!("{}", result);
 
