@@ -8,6 +8,14 @@ edition = "2018"
 name = "correlate-stocks"
 path = "src/main.rs"
 
+[profile.dev]
+opt-level = 2
+lto = true
+
+[profile.release]
+lto = true
+
 [dependencies]
+chrono = "0.4.19"
 csv = "1.1.6"
 serde = { version = "1.0.125",  features = ["derive"] }
